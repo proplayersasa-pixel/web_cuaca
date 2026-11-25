@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CuacaID - Informasi cuaca real-time dan prakiraan cuaca Indonesia.">
+  <title>CuacaID | Prakiraan Cuaca Indonesia</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- AOS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <!-- Leaflet Map -->
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+
+  <!-- CSS Sendiri -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body data-bs-spy="scroll" data-bs-target="#navbarMenu" data-bs-offset="100" tabindex="0">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg fixed-top" id="mainNavbar">
+    <div class="container">
+
+      <a class="navbar-brand" href="#beranda">
+        <i class="bi bi-cloud-sun-fill"></i>
+        Cuaca<span>ID</span>
+      </a>
+
+      <button class="navbar-toggler" type="button"
+        data-bs-toggle="collapse" data-bs-target="#navbarMenu"
+        aria-controls="navbarMenu" aria-expanded="false"
+        aria-label="Buka menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMenu">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item">
+            <a class="nav-link active" href="#beranda">Beranda</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#cuaca">Cuaca Terkini</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#kota">5 Kota Besar</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#prakiraan">Prakiraan</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#peta">Peta Cuaca</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#tentang">Tentang</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#kontak">Kontak</a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero" id="beranda">
+    <img
+      class="hero-image"
+      src="https://images.unsplash.com/photo-1534088568595-a066f410bcda?auto=format&fit=crop&w=1920&q=85"
+      alt="Pemandangan langit dan awan"
+    >
+
+    <div class="hero-overlay"></div>
+
+    <div class="container hero-content">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+
+          <div class="hero-label" data-aos="fade-down">
+            <i class="bi bi-broadcast"></i>
+            Informasi Cuaca Indonesia
+          </div>
+
+          <h1 data-aos="fade-up">
+            Pantau Cuaca Hari Ini,
+            <span>Rencanakan Hari Esok.</span>
+          </h1>
+
+          <p class="hero-description" data-aos="fade-up" data-aos-delay="100">
+            Temukan informasi cuaca terkini, suhu, kelembapan,
+            kecepatan angin, dan prakiraan cuaca berbagai kota
+            di Indonesia dalam satu tempat.
+          </p>
+
+          <a href="#cuaca" class="btn btn-light hero-button" data-aos="fade-up" data-aos-delay="200">
+            Jelajahi Cuaca
+            <i class="bi bi-arrow-up-right ms-2"></i>
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-bottom">
+      <div class="container d-flex justify-content-between flex-wrap gap-2">
+        <span><i class="bi bi-geo-alt"></i> Indonesia</span>
+        <span><i class="bi bi-arrow-repeat"></i> Data Cuaca dari Open-Meteo</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CUACA TERKINI DAN PENCARIAN -->
+  <section class="section-padding" id="cuaca">
+    <div class="container">
+
+      <div class="section-heading text-center" data-aos="fade-up">
+        <span class="section-label">CUACA REAL-TIME</span>
+        <h2>Cari Cuaca di Wilayahmu</h2>
+        <p>
+          Masukkan nama kota atau kabupaten untuk mengetahui
+          kondisi cuaca terkini.
+        </p>
+      </div>
+
+      <div class="search-wrapper" data-aos="fade-up">
+        <form id="searchForm" class="search-form">
+          <i class="bi bi-search search-icon"></i>
+
+          <input type="search" id="cityInput"
+            placeholder="Cari kota, misalnya Makassar..."
+            aria-label="Nama kota" required>
+
+          <button type="submit" id="searchButton">
+            <span>Cari Cuaca</span>
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </form>
+
+        <button class="location-button" id="locationButton" type="button">
+          <i class="bi bi-crosshair"></i>
+          Gunakan lokasi saya
+        </button>
+
+        <div id="searchResults" class="search-results" aria-live="polite"></div>
+        <div id="searchMessage" class="status-message" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="row g-4 mt-3">
+
+        <div class="col-lg-7" data-aos="fade-right">
+          <div class="main-weather-card">
+
+            <div class="weather-top">
+              <div>
+                <span class="weather-tag">
+                  <i class="bi bi-broadcast"></i> Cuaca terkini
+                </span>
+                <h3 id="weatherCity">Makassar</h3>
+                <p id="weatherDate">Memuat data...</p>
+              </div>
+              <i class="bi bi-geo-alt weather-location-icon"></i>
+            </div>
+
+            <div class="weather-center">
+              <div class="weather-main-icon">
+                <i class="bi bi-cloud-sun-fill" id="weatherIcon"></i>
+              </div>
+              <div>
+                <h2 id="weatherTemp">--°</h2>
+                <p id="weatherDesc">Mengambil data cuaca...</p>
+              </div>
+            </div>
+
+            <div class="weather-card-footer">
+              <span>
+                <i class="bi bi-thermometer-half"></i>
+                Terasa <strong id="feelsLike">--°C</strong>
+              </span>
+              <span>
+                <i class="bi bi-clock"></i>
+                <strong id="updateTime">--:--</strong>
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="col-lg-5" data-aos="fade-left">
+          <div class="weather-details">
+            <h4>Detail Cuaca</h4>
+            <p>Informasi kondisi atmosfer saat ini</p>
+
+            <div class="detail-item">
+              <div class="detail-icon">
+                <i class="bi bi-droplet-fill"></i>
+              </div>
+              <div>
+                <span>Kelembapan</span>
+                <strong id="humidity">--%</strong>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <div class="detail-icon">
+                <i class="bi bi-wind"></i>
+              </div>
+              <div>
+                <span>Kecepatan Angin</span>
+                <strong id="windSpeed">-- km/jam</strong>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <div class="detail-icon">
+                <i class="bi bi-cloud-rain-fill"></i>
+              </div>
+              <div>
+                <span>Curah Hujan</span>
+                <strong id="rainfall">-- mm</strong>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <div class="detail-icon">
+                <i class="bi bi-speedometer2"></i>
+              </div>
+              <div>
+                <span>Tekanan Udara</span>
+                <strong id="pressure">-- hPa</strong>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5 KOTA BESAR -->
+  <section class="section-padding section-light" id="kota">
+    <div class="container">
+
+      <div class="section-heading text-center" data-aos="fade-up">
+        <span class="section-label">JELAJAHI INDONESIA</span>
+        <h2>Cuaca 5 Kota Besar</h2>
+        <p>
+          Pantau kondisi cuaca terkini di lima kota besar Indonesia.
+        </p>
+      </div>
+
+      <div class="row g-4" id="cityCards">
+        <div class="col-12 text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Memuat...</span>
+          </div>
+          <p class="mt-3">Mengambil informasi cuaca kota...</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PRAKIRAAN 5 HARI -->
+  <section class="section-padding" id="prakiraan">
+    <div class="container">
+
+      <div class="section-heading text-center" data-aos="fade-up">
+        <span class="section-label">RENCANAKAN AKTIVITAS</span>
+        <h2>Prakiraan Cuaca 5 Hari</h2>
+        <p id="forecastSubtitle">
+          Perkiraan kondisi cuaca untuk lima hari ke depan.
+        </p>
+      </div>
+
+      <div class="row g-4" id="forecastCards">
+        <div class="col-12 text-center">
+          <p>Sedang mengambil prakiraan cuaca...</p>
+        </div>
+      </div>
+
+      <!-- CUACA PER JAM -->
+      <div class="hourly-wrapper mt-5" data-aos="fade-up">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+          <div>
+            <h3>Prakiraan Per Jam</h3>
+            <p>Estimasi perubahan cuaca dalam beberapa jam berikutnya.</p>
+          </div>
+          <span class="hourly-label">
+            <i class="bi bi-clock-history"></i> 8 Jam
+          </span>
+        </div>
+
+        <div class="hourly-list" id="hourlyForecast">
+          <p>Memuat informasi per jam...</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PETA CUACA -->
+  <section class="section-padding section-light" id="peta">
+    <div class="container">
+
+      <div class="section-heading text-center" data-aos="fade-up">
+        <span class="section-label">PETA INTERAKTIF</span>
+        <h2>Jelajahi Peta Cuaca Indonesia</h2>
+        <p>
+          Lihat lokasi wilayah dan pilih penanda kota untuk
+          menampilkan informasi cuaca.
+        </p>
+      </div>
+
+      <div class="map-container" data-aos="zoom-in">
+        <div class="map-header">
+          <div>
+            <h3><i class="bi bi-map"></i> Peta Wilayah Indonesia</h3>
+            <span>Penanda lokasi kota dan data cuaca</span>
+          </div>
+          <span class="map-live">
+            <i class="bi bi-circle-fill"></i> LIVE API
+          </span>
+        </div>
+
+        <div id="weatherMap"></div>
+
+        <div class="map-footer">
+          <i class="bi bi-info-circle"></i>
+          Klik penanda kota untuk melihat suhu.
+          Klik peta untuk mencari cuaca pada titik tersebut.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TENTANG -->
+  <section class="section-padding" id="tentang">
+    <div class="container">
+      <div class="row align-items-center g-5">
+
+        <div class="col-lg-6" data-aos="fade-right">
+          <div class="about-photo">
+            <img
+              src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1000&q=85"
+              alt="Pemandangan alam dengan langit cerah"
+              loading="lazy">
+            <div class="about-photo-badge">
+              <i class="bi bi-cloud-sun-fill"></i>
+              <span>Kenali cuaca, siapkan harimu.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6" data-aos="fade-left">
+          <span class="section-label">TENTANG CUACAID</span>
+          <h2 class="about-title">
+            Informasi Cuaca yang Mudah Diakses.
+          </h2>
+
+          <p class="about-description">
+            CuacaID adalah aplikasi website yang membantu
+            masyarakat memperoleh informasi cuaca untuk
+            berbagai wilayah di Indonesia.
+          </p>
+
+          <p class="about-description">
+            Dengan integrasi Open-Meteo API, pengguna dapat
+            melihat kondisi cuaca terkini, mencari lokasi,
+            memeriksa prakiraan harian, dan menjelajahi
+            peta secara interaktif.
+          </p>
+
+          <div class="about-feature">
+            <i class="bi bi-check-circle-fill"></i>
+            Data cuaca terintegrasi dengan API
+          </div>
+          <div class="about-feature">
+            <i class="bi bi-check-circle-fill"></i>
+            Pencarian berbagai kota Indonesia
+          </div>
+          <div class="about-feature">
+            <i class="bi bi-check-circle-fill"></i>
+            Tampilan responsif dan mudah digunakan
+          </div>
+
+          <a href="#prakiraan" class="btn btn-primary about-button mt-4">
+            Lihat Prakiraan <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section-padding section-light" id="faq">
+    <div class="container">
+
+      <div class="section-heading text-center" data-aos="fade-up">
+        <span class="section-label">PUSAT BANTUAN</span>
+        <h2>Pertanyaan yang Sering Diajukan</h2>
+        <p>Temukan jawaban seputar penggunaan website CuacaID.</p>
+      </div>
+
+      <div class="faq-wrapper" data-aos="fade-up">
+        <div class="accordion" id="faqAccordion">
+
+          <div class="accordion-item">
+            <h3 class="accordion-header">
+              <button class="accordion-button" type="button"
+                data-bs-toggle="collapse" data-bs-target="#faq1">
+                Apakah informasi cuaca CuacaID real-time?
+              </button>
+            </h3>
+            <div id="faq1" class="accordion-collapse collapse show"
+              data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                CuacaID mengambil data terbaru yang tersedia
+                melalui Open-Meteo API. Data berasal dari
+                model cuaca dan tidak selalu diperbarui
+                setiap detik.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#faq2">
+                Bagaimana cara mencari cuaca suatu kota?
+              </button>
+            </h3>
+            <div id="faq2" class="accordion-collapse collapse"
+              data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Ketik nama kota pada kolom pencarian,
+                tekan Cari Cuaca, lalu pilih wilayah
+                dari hasil pencarian yang tersedia.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#faq3">
+                Apakah CuacaID dapat digunakan secara gratis?
+              </button>
+            </h3>
+            <div id="faq3" class="accordion-collapse collapse"
+              data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Website demo ini dapat diakses tanpa biaya.
+                Layanan API yang digunakan memiliki ketentuan
+                penggunaan, terutama untuk kebutuhan komersial.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#faq4">
+                Apakah prakiraan cuaca selalu akurat?
+              </button>
+            </h3>
+            <div id="faq4" class="accordion-collapse collapse"
+              data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Prakiraan merupakan estimasi berdasarkan
+                model meteorologi. Kondisi aktual dapat
+                berubah sewaktu-waktu.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- KONTAK -->
+  <section class="section-padding" id="kontak">
+    <div class="container">
+
+      <div class="section-heading text-center" data-aos="fade-up">
+        <span class="section-label">HUBUNGI KAMI</span>
+        <h2>Punya Pertanyaan?</h2>
+        <p>
+          Sampaikan kritik, saran, atau pertanyaan
+          melalui formulir berikut.
+        </p>
+      </div>
+
+      <div class="row g-4 justify-content-center">
+
+        <div class="col-lg-4" data-aos="fade-right">
+          <div class="contact-info">
+            <div class="contact-icon">
+              <i class="bi bi-chat-dots"></i>
+            </div>
+            <h3>Mari Terhubung</h3>
+            <p>
+              Kami senang menerima masukan dan ide
+              untuk pengembangan CuacaID.
+            </p>
+
+            <div class="contact-info-item">
+              <i class="bi bi-globe2"></i>
+              <span>Jangkauan: Indonesia</span>
+            </div>
+
+            <div class="contact-info-item">
+              <i class="bi bi-cloud-sun"></i>
+              <span>Platform: Website CuacaID</span>
+            </div>
+
+            <div class="contact-info-item">
+              <i class="bi bi-database"></i>
+              <span>Sumber data: Open-Meteo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-7" data-aos="fade-left">
+          <div class="contact-form-wrapper">
+            <h3>Kirim Pesan</h3>
+            <p>Isi informasi di bawah ini dengan benar.</p>
+
+            <form id="contactForm">
+              <div class="row g-3">
+
+                <div class="col-md-6">
+                  <label for="contactName" class="form-label">Nama Lengkap</label>
+                  <input type="text" class="form-control" id="contactName"
+                    placeholder="Nama kamu" required minlength="2">
+                </div>
+
+                <div class="col-md-6">
+                  <label for="contactEmail" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="contactEmail"
+                    placeholder="nama@email.com" required>
+                </div>
+
+                <div class="col-12">
+                  <label for="contactSubject" class="form-label">Subjek</label>
+                  <input type="text" class="form-control" id="contactSubject"
+                    placeholder="Subjek pesan" required>
+                </div>
+
+                <div class="col-12">
+                  <label for="contactMessage" class="form-label">Pesan</label>
+                  <textarea class="form-control" id="contactMessage"
+                    rows="5" placeholder="Tuliskan pesan kamu..."
+                    required></textarea>
+                </div>
+
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary contact-submit">
+                    Kirim Pesan <i class="bi bi-send ms-2"></i>
+                  </button>
+                  <p class="form-note mt-2">
+                    Demo: pesan belum dikirim ke server.
+                  </p>
+                </div>
+
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <h3 class="footer-logo">
+            <i class="bi bi-cloud-sun-fill"></i> CuacaID
+          </h3>
+          <p>
+            Platform informasi cuaca Indonesia yang
+            membantu kamu merencanakan aktivitas
+            dengan lebih baik.
+          </p>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <h4>Menu Navigasi</h4>
+          <a href="#beranda">Beranda</a>
+          <a href="#cuaca">Cuaca Terkini</a>
+          <a href="#prakiraan">Prakiraan</a>
+          <a href="#peta">Peta Cuaca</a>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+          <h4>Informasi</h4>
+          <a href="#tentang">Tentang Kami</a>
+          <a href="#faq">Pertanyaan Umum</a>
+          <a href="#kontak">Hubungi Kami</a>
+          <a href="https://open-meteo.com/" target="_blank" rel="noopener">
+            Sumber API Open-Meteo
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; <span id="copyrightYear"></span> CuacaID. All Rights Reserved.</span>
+        <span>Weather data by Open-Meteo · Map data by OpenStreetMap</span>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- BACK TO TOP -->
+  <button id="backToTop" aria-label="Kembali ke atas">
+    <i class="bi bi-arrow-up"></i>
+  </button>
+
+  <!-- TOAST -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="siteToast" class="toast border-0 shadow" role="status"
+      aria-live="polite" aria-atomic="true">
+      <div class="toast-header">
+        <i class="bi bi-cloud-sun-fill text-primary me-2"></i>
+        <strong class="me-auto">CuacaID</strong>
+        <button type="button" class="btn-close"
+          data-bs-dismiss="toast" aria-label="Tutup"></button>
+      </div>
+      <div class="toast-body" id="toastMessage"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
